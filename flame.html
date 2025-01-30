@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Candle</title>
+  <style>
+    /* Background Gradient */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: radial-gradient(circle, #8c8c8c 20%, #1a1a1a 80%);
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    /* Candle */
+    .candle {
+      position: relative;
+      width: 80px;
+      height: 250px;
+      background: #f0e6d2;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Straightened Top */
+    .candle::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 20px;
+      background: #f0e6d2;
+      border-radius: 5px;
+    }
+
+    /* Wick */
+    .wick {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 25px;
+      background: linear-gradient(to bottom, #3a3a3a, #000);
+      border-radius: 3px;
+      z-index: 3;
+    }
+
+    /* Flame and Glow */
+    .flame-container {
+      position: absolute;
+      top: -70px;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: pointer;
+      z-index: 4;
+    }
+
+    .flame {
+      width: 25px;
+      height: 70px;
+      background: linear-gradient(to bottom, #ff5722, #ffc107, #ffeb3b);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      position: relative;
+      animation: flicker 0.15s infinite alternate;
+      z-index: 5;
+    }
+
+    /* Glow Effect */
+    .glow {
+      position: absolute;
+      top: -120%;
+      left: -120%;
+      width: 340%;
+      height: 340%;
+      background: radial-gradient(circle, rgba(255, 235, 59, 0.6) 10%, rgba(255, 165, 0, 0.3) 40%, rgba(255, 165, 0, 0.1) 60%, transparent 90%);
+      border-radius: 50%;
+      z-index: 2;
+      animation: glow 0.15s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { transform: skew(3deg, 0); opacity: 0.9; }
+      100% { transform: skew(-3deg, 0); opacity: 1; }
+    }
+
+    @keyframes glow {
+      0% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    /* Dripping Wax */
+    .wax {
+      position: absolute;
+      width: 12px;
+      height: 35px;
+      background: #e6d5b8;
+      border-radius: 10px 10px 50% 50%;
+      top: 10px;
+      left: 30%;
+      opacity: 0;
+      animation: drip 2s infinite ease-in-out;
+    }
+
+    .wax:nth-child(1) { animation-delay: 0.5s; }
+    .wax:nth-child(2) { animation-delay: 1.2s; }
+    .wax:nth-child(3) { animation-delay: 2s; }
+
+    @keyframes drip {
+      0% { top: 10px; opacity: 1; transform: scaleY(1); }
+      50% { top: 70%; opacity: 1; transform: scaleY(1.2); }
+      100% { top: 100%; opacity: 0; transform: scaleY(1.5); }
+    }
+
+    /* Improved Smoke Effect */
+    .smoke {
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle, rgba(85, 85, 85, 0.7), rgba(85, 85, 85, 0.3), transparent);
+      border-radius: 50%;
+      opacity: 0;
+      animation: smoke 3s ease-out infinite;
+    }
+
+    .smoke:nth-child(1) { animation-delay: 0s; }
+    .smoke:nth-child(2) { animation-delay: 1s; }
+    .smoke:nth-child(3) { animation-delay: 2s; }
+
+    @keyframes smoke {
+      0% { opacity: 0.7; transform: scale(1) translateY(0); }
+      30% { opacity: 0.5; transform: scale(1.5) translateY(-50px); }
+      60% { opacity: 0.3; transform: scale(2) translateY(-100px); }
+      100% { opacity: 0; transform: scale(2.5) translateY(-150px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="candle">
+    <!-- Wick -->
+    <div class="wick"></div>
+
+    <!-- Flame and Glow -->
+    <div class="flame-container" id="flame-container">
+      <div class="flame" id="flame"></div>
+      <div class="glow"></div>
+    </div>
+
+    <!-- Dripping Wax -->
+    <div class="wax"></div>
+    <div class="wax"></div>
+    <div class="wax"></div>
+
+    <!-- Smoke -->
+    <div class="smoke" id="smoke1"></div>
+    <div class="smoke" id="smoke2"></div>
+    <div class="smoke" id="smoke3"></div>
+  </div>
+
+  <script>
+    const flameContainer = document.getElementById('flame-container');
+    const flame = document.getElementById('flame');
+    const smokes = document.querySelectorAll('.smoke');
+
+    // Ensure flame is visible on load
+    flame.style.display = 'block';
+
+    // Flame follows cursor
+    document.addEventListener('mousemove', (e) => {
+      const rect = flameContainer.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left - rect.width / 2;
+      const offsetY = e.clientY - rect.top - rect.height / 2;
+      flame.style.transform = `translate(${offsetX * 0.05}px, ${offsetY * 0.05}px)`;
+    });
+
+    // Extinguish flame on click
+    flameContainer.addEventListener('click', () => {
+      flame.style.display = 'none';
+
+      smokes.forEach(smoke => {
+        smoke.style.opacity = '1';
+        setTimeout(() => {
+          smoke.style.opacity = '0';
+          flame.style.display = 'block'; // Relight flame after smoke disappears
+        }, 3000);
+      });
+    });
+  </script>
+</body>
+</html>
